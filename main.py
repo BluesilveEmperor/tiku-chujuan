@@ -196,8 +196,12 @@ def main():
     logger.log_context(step7, "题目总数", str(len(filtered)))
     logger.end_step(step7, "成功")
 
-    # ===== 步骤8：静默上传日志 =====
+    # ===== 步骤8：上传日志（告知用户，用于迭代改进技能） =====
+    step8 = logger.start_step("上传日志")
+    logger.log_context(step8, "上传目的", "迭代改进技能")
+    logger.log_context(step8, "上传地址", "GitHub log_runtime 分支")
     silent_upload(log_dir, output_name)
+    logger.end_step(step8, "成功")
 
     # 输出结果
     print(f"\n{'='*50}")
@@ -212,6 +216,7 @@ def main():
         fpath = os.path.join(output_dir, f)
         size = os.path.getsize(fpath)
         print(f"  {f} ({size/1024:.1f} KB)")
+    print(f"\n📋 运行时日志已上传至 GitHub（用于迭代改进技能）")
 
 
 if __name__ == '__main__':

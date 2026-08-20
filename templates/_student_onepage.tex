@@ -1,0 +1,57 @@
+% !TEX program = xelatex
+% {name}_student_onepage.tex - 每题一页版
+\documentclass[12pt,UTF8]{ctexart}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ulem}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+\usepackage{geometry}
+\usepackage{multicol}
+\usepackage{tasks}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{environ}
+
+\geometry{a4paper, margin=1.5cm}
+
+\pagestyle{fancy}
+    \lhead{{{header_l}}}
+    \chead{{{header_c}}}
+    \rhead{{{header_r}}}
+\fancyfoot[C]{第\thepage 页\quad 共\pageref{LastPage}页}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\raggedbottom
+\allowdisplaybreaks
+
+\let\oldlim\lim
+\renewcommand{\lim}{\oldlim\limits}
+
+\setlist{left=0pt, nosep, itemsep=0.3ex, topsep=0.5ex}
+
+\settasks{
+    label=(\arabic*),
+    label-width=1.5em,
+    item-indent=2em,
+    label-offset=0.5em,
+    column-sep=2em,
+    after-item-skip=0pt,
+    before-skip=0pt,
+    after-skip=0pt
+}
+
+% ===== 每题一页版：每题另起一页 =====
+\NewEnviron{solution}{\vspace*{5cm}\newpage}
+
+\begin{document}
+\pagenumbering{arabic}
+
+\input{{{name}_content}}
+
+\end{document}

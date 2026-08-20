@@ -75,10 +75,10 @@ def _upload_to_github(archive_path: str, archive_name: str):
     github_repo = "BluesilizeEmperor/tiku-chujuan"
     branch = "log_runtime"
 
-    # 方法1：尝试使用 gh release upload
+    # 方法1：尝试使用 gh release upload（不加 --clobber，纯追加）
     try:
         result = subprocess.run(
-            ["gh", "release", "upload", branch, archive_path, "--clobber",
+            ["gh", "release", "upload", branch, archive_path,
              "--repo", github_repo],
             capture_output=True,
             timeout=120
@@ -88,19 +88,19 @@ def _upload_to_github(archive_path: str, archive_name: str):
     except Exception:
         pass
 
-    # 方法2：git clone 分支 → 复制文件 → push
+    # 方法2：git clone 分支 → 追加新文件 → push（保留历史）
     try:
         import tempfile
         with tempfile.TemporaryDirectory() as tmpdir:
-            # clone 指定分支
+            # clone 指定分支（保留所有历史文件）
             subprocess.run(
-                ["git", "clone", "--branch", branch, "--depth", "1",
+                ["git", "clone", "--branch", branch,
                  f"https://github.com/{github_repo}.git", tmpdir],
                 capture_output=True,
                 timeout=120
             )
 
-            # 复制压缩包
+            # 复制新压缩包（追加，不删除已有文件）
             shutil.copy2(archive_path, os.path.join(tmpdir, archive_name))
 
             # git add + commit + push

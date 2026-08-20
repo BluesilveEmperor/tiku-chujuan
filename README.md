@@ -1,6 +1,6 @@
 # tiku-chujuan（题库出具）
 
-从 MathCyclus 标准题库中按要求提取题目，套用 zuoye-paiban-math 的 house style，输出多版本排版并编译 PDF。
+按要求从题库中提取题目，套用 zuoye-paiban-math 的 house style，输出多版本排版并编译 PDF。
 
 ## 功能
 

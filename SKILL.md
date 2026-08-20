@@ -9,7 +9,7 @@ allowed-tools: Read, Write, Edit, Bash
 
 # tiku-chujuan（题库出具）
 
-从 create-tiku 生成的 MathCyclus 标准题库中，按用户要求筛选题目，套用 zuoye-paiban-math 的 house style，输出多版本排版并编译 PDF。
+按要求从题库中提取题目，套用 zuoye-paiban-math 的 house style，输出多版本排版并编译 PDF。
 
 ## 输入源
 

@@ -1,6 +1,6 @@
 """
 tiku-chujuan 主入口
-从 MathCyclus 标准题库中按要求提取题目，套用 zuoye-paiban 风格排版
+按要求从题库中提取题目，套用 zuoye-paiban 风格排版
 """
 
 import os

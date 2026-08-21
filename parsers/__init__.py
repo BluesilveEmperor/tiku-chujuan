@@ -40,13 +40,14 @@ class Question:
                 lines.append(f"\\task {c['text']}")
             lines.append("\\end{tasks}")
 
-        # solution 环境：包含答案 + 解答
-        lines.append("\\begin{solution}")
+        # 根据题型选择 solution 环境名
+        env_name = "solution-proof" if self.qtype == "解答" else "solution-choice"
+        lines.append(f"\\begin{{{env_name}}}")
         if self.answer:
             lines.append(f"解：{self.answer}")
         if self.solution:
             lines.append(self.solution)
-        lines.append("\\end{solution}")
+        lines.append(f"\\end{{{env_name}}}")
         lines.append("\\\\")
 
         return "\n".join(lines)

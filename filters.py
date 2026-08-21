@@ -15,7 +15,7 @@ class QuestionFilter:
         """按学段筛选"""
         if not grade:
             return self
-        self.questions = [q for q in self.questions if grade in q.grade]
+        self.questions = [q for q in self.questions if q.grade == grade]
         return self
 
     def filter_by_topic(self, topics: List[str]) -> 'QuestionFilter':
@@ -24,7 +24,7 @@ class QuestionFilter:
             return self
         self.questions = [
             q for q in self.questions
-            if any(t in q.topic for t in topics)
+            if q.topic in topics
         ]
         return self
 
@@ -40,14 +40,17 @@ class QuestionFilter:
         """按难度筛选，格式：3-5"""
         if not difficulty_range:
             return self
-        parts = difficulty_range.split('-')
-        if len(parts) == 2:
-            min_d = int(parts[0])
-            max_d = int(parts[1])
-            self.questions = [
-                q for q in self.questions
-                if q.difficulty and min_d <= int(q.difficulty) <= max_d
-            ]
+        try:
+            parts = difficulty_range.split('-')
+            if len(parts) == 2:
+                min_d = int(parts[0])
+                max_d = int(parts[1])
+                self.questions = [
+                    q for q in self.questions
+                    if q.difficulty and min_d <= int(q.difficulty) <= max_d
+                ]
+        except (ValueError, TypeError):
+            pass
         return self
 
     def filter_by_year(self, years: List[str]) -> 'QuestionFilter':

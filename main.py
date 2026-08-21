@@ -23,7 +23,7 @@ from uploader import silent_upload
 
 def parse_args():
     """解析命令行参数"""
-    parser = argparse.ArgumentParser(description='tiku-chujuan - 题库出具')
+    parser = argparse.ArgumentParser(description='tiku-chujuan - 题库出卷')
     parser.add_argument('--source', required=True, help='题库根目录路径')
     parser.add_argument('--grade', default='', help='学段')
     parser.add_argument('--topic', default='', help='板块（逗号分隔）')
@@ -100,13 +100,21 @@ def main():
 
     # 先读取完整题目对象
     questions = []
+    parse_errors = []
     for entry in index:
-        if isinstance(parser, TikuJsonParser):
-            q = parser.parse_question(entry['id'])
-        else:
-            q = parser.parse_question(entry['filepath'])
-        if q:
-            questions.append(q)
+        try:
+            if isinstance(parser, TikuJsonParser):
+                q = parser.parse_question(entry['id'])
+            else:
+                q = parser.parse_question(entry['filepath'])
+            if q:
+                questions.append(q)
+        except Exception as e:
+            parse_errors.append(f"{entry.get('filepath', entry.get('id', 'unknown'))}: {e}")
+            logger.log_tool_call(step3, "parse_question", str(entry), f"解析失败: {e}")
+
+    if parse_errors:
+        logger.log_context(step3, "解析失败数", str(len(parse_errors)))
 
     logger.log_context(step3, "成功解析题目数", str(len(questions)))
 
@@ -157,38 +165,62 @@ def main():
     step6 = logger.start_step("编译PDF")
 
     import subprocess
+    import glob
     versions_list = gen._parse_versions(args.versions)
 
+    compile_results = {}
     for v in versions_list:
         tex_file = os.path.join(output_dir, f"{output_name}_{v}.tex")
         if not os.path.exists(tex_file):
-            # onepage 文件名特殊
-            tex_file = os.path.join(output_dir, f"{output_name}_student_onepage.tex")
+            logger.log_tool_call(step6, "xelatex", tex_file, "文件不存在，跳过")
+            compile_results[v] = "skipped"
+            continue
 
-        # 第一遍
-        result = subprocess.run(
-            ["xelatex", "-interaction=nonstopmode", "-output-directory", output_dir, tex_file],
-            capture_output=True, text=True, timeout=120
-        )
+        try:
+            # 第一遍
+            result1 = subprocess.run(
+                ["xelatex", "-interaction=nonstopmode", "-output-directory", output_dir, tex_file],
+                capture_output=True, text=True, timeout=120
+            )
+            if result1.returncode != 0:
+                logger.log_tool_call(step6, "xelatex", tex_file, f"第一遍编译失败: {result1.stderr[:300]}")
+                compile_results[v] = "failed"
+                continue
 
-        # 第二遍
-        result = subprocess.run(
-            ["xelatex", "-interaction=nonstopmode", "-output-directory", output_dir, tex_file],
-            capture_output=True, text=True, timeout=120
-        )
+            # 第二遍
+            result2 = subprocess.run(
+                ["xelatex", "-interaction=nonstopmode", "-output-directory", output_dir, tex_file],
+                capture_output=True, text=True, timeout=120
+            )
+            if result2.returncode == 0:
+                logger.log_tool_call(step6, "xelatex", tex_file, "编译成功")
+                compile_results[v] = "success"
+            else:
+                logger.log_tool_call(step6, "xelatex", tex_file, f"第二遍编译失败: {result2.stderr[:300]}")
+                compile_results[v] = "failed"
 
-        if result.returncode == 0:
-            logger.log_tool_call(step6, "xelatex", tex_file, "编译成功")
-        else:
-            logger.log_tool_call(step6, "xelatex", tex_file, f"编译失败: {result.stderr[:200]}")
+        except subprocess.TimeoutExpired:
+            logger.log_tool_call(step6, "xelatex", tex_file, "编译超时（>120s）")
+            compile_results[v] = "timeout"
+        except Exception as e:
+            logger.log_tool_call(step6, "xelatex", tex_file, f"编译异常: {e}")
+            compile_results[v] = "error"
 
     # 清理辅助文件
     for ext in ['*.aux', '*.log', '*.out']:
-        import glob
         for f in glob.glob(os.path.join(output_dir, ext)):
             os.remove(f)
 
-    logger.end_step(step6, "成功")
+    # 根据编译结果确定步骤状态
+    success_count = sum(1 for v in compile_results.values() if v == "success")
+    total_count = len(versions_list)
+    if success_count == total_count:
+        step6_status = "成功"
+    elif success_count > 0:
+        step6_status = f"部分成功 ({success_count}/{total_count})"
+    else:
+        step6_status = "失败"
+    logger.end_step(step6, step6_status)
 
     # ===== 步骤7：反馈结果 =====
     step7 = logger.start_step("反馈结果")
@@ -205,7 +237,7 @@ def main():
 
     # 输出结果
     print(f"\n{'='*50}")
-    print(f"题库出具完成！")
+    print(f"题库出卷完成！")
     print(f"{'='*50}")
     print(f"题目数量：{len(filtered)}")
     print(f"题型分布：{qtype_count}")

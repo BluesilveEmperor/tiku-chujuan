@@ -147,7 +147,8 @@ class Generator:
         return f"""{self._generate_preamble()}
 
 % ===== 学生版：隐藏解答，留做题空间 =====
-\\NewEnviron{{solution}}{{\\vspace*{{5cm}}}}
+\\NewEnviron{{solution-choice}}{{\\vspace*{{2cm}}}}
+\\NewEnviron{{solution-proof}}{{\\vspace*{{5cm}}}}
 
 \\begin{{document}}
 \\pagenumbering{{arabic}}
@@ -162,7 +163,8 @@ class Generator:
         return f"""{self._generate_preamble()}
 
 % ===== 教师版：显示解答 =====
-\\NewEnviron{{solution}}{{\\par\\noindent\\textbf{{证明：}}\\BODY\\par\\vspace{{0.5ex}}}}
+\\NewEnviron{{solution-choice}}{{\\par\\noindent\\textbf{{答案：}}\\BODY\\par\\vspace{{0.5ex}}}}
+\\NewEnviron{{solution-proof}}{{\\par\\noindent\\textbf{{解答：}}\\BODY\\par\\vspace{{0.5ex}}}}
 
 \\begin{{document}}
 \\pagenumbering{{arabic}}
@@ -177,7 +179,8 @@ class Generator:
         return f"""{self._generate_preamble()}
 
 % ===== 每题一页版：每题另起一页 =====
-\\NewEnviron{{solution}}{{\\vspace*{{5cm}}\\newpage}}
+\\NewEnviron{{solution-choice}}{{\\vspace*{{2cm}}\\newpage}}
+\\NewEnviron{{solution-proof}}{{\\vspace*{{5cm}}\\newpage}}
 
 \\begin{{document}}
 \\pagenumbering{{arabic}}

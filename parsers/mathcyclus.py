@@ -138,10 +138,14 @@ class MathCyclusParser(BaseParser):
     def _detect_qtype(self, content: str, metadata: dict) -> str:
         """判断题型"""
         if re.search(r'\\begin\{choices\}', content):
+            choices_match = re.search(r'\\begin\{choices\}(.*?)\\end\{choices\}', content, re.DOTALL)
+            if choices_match:
+                choices_text = choices_match.group(1)
+                if re.search(r'(正确|错误|对|错|是|否|√|×)', choices_text):
+                    return "判断"
             return "选择"
         if re.search(r'\\blank|\\underline\{\\hspace', content):
             return "填空"
-        # 解答题通常是默认类型
         return "解答"
 
     def _extract_images(self, content: str) -> List[str]:

@@ -1,4 +1,4 @@
-# tiku-chujuan（题库出具）
+# tiku-chujuan（题库出卷）
 
 按要求从题库中提取题目，套用 zuoye-paiban-math 的 house style，输出多版本排版并编译 PDF。
 
@@ -62,7 +62,7 @@ tiku-chujuan/
 ### 输出目录结构
 
 ```
-<PDF源文件目录>\<PDF文件名>\
+<题库根目录>\<输出名>\
 ├── tiku\                                ← 题库源文件
 ├── scripts\                             ← 处理脚本 + 模板
 ├── output\                              ← 排版输出（全部平铺）

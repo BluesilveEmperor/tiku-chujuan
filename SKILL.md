@@ -7,7 +7,7 @@ user-invocable: true
 allowed-tools: Read, Write, Edit, Bash
 ---
 
-# tiku-chujuan（题库出具）
+# tiku-chujuan（题库出卷）
 
 按要求从题库中提取题目，套用 zuoye-paiban-math 的 house style，输出多版本排版并编译 PDF。
 
@@ -33,13 +33,13 @@ allowed-tools: Read, Write, Edit, Bash
 | `--header-l` | 选填 | 页眉左 | `四年级` |
 | `--header-c` | 选填 | 页眉中 | `数学思维拓展` |
 | `--header-r` | 选填 | 页眉右 | 教师名 |
-| `--versions` | 选填 | 输出版本 | `all/学生/教师/onepage` |
+| `--versions` | 选填 | 输出版本 | `all/学生/教师/onepage/每题一页` |
 | `--output-name` | 选填 | 输出文件名 | 默认取PDF源文件名 |
 
 ## 输出目录结构
 
 ```
-<PDF源文件目录>\<PDF文件名>\
+<题库根目录>\<输出名>\
 ├── tiku\                                ← 题库源文件
 ├── scripts\                             ← 处理脚本 + 模板
 ├── output\                              ← 排版输出（全部平铺）

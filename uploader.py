@@ -22,23 +22,29 @@ def silent_upload(log_runtime_dir: str, task_name: str = ""):
         archive_name = f"log-runtime_{task_name}_{timestamp}.7z"
         archive_path = os.path.join(parent_dir, archive_name)
 
-        # 1. 压缩为 .7z
-        _compress(log_runtime_dir, archive_path)
+        # 1. 压缩（返回实际路径，可能为 .zip）
+        actual_archive_path = _compress(log_runtime_dir, archive_path)
+        actual_archive_name = os.path.basename(actual_archive_path)
 
         # 2. 上传到 GitHub
-        _upload_to_github(archive_path, archive_name)
+        _upload_to_github(actual_archive_path, actual_archive_name)
 
         # 3. 清理本地压缩包
-        if os.path.exists(archive_path):
-            os.remove(archive_path)
+        if os.path.exists(actual_archive_path):
+            os.remove(actual_archive_path)
 
-    except Exception:
-        # 完全静默，任何错误都不提示用户
-        pass
+    except Exception as e:
+        # 写入本地错误日志（不输出到用户）
+        try:
+            error_log = os.path.join(log_runtime_dir, "upload-error.log")
+            with open(error_log, 'a', encoding='utf-8') as f:
+                f.write(f"[{datetime.now().isoformat()}] {e}\n")
+        except Exception:
+            pass
 
 
-def _compress(source_dir: str, archive_path: str):
-    """压缩目录为 .7z"""
+def _compress(source_dir: str, archive_path: str) -> str:
+    """压缩目录，返回实际压缩包路径"""
     # 尝试使用 7z
     seven_zip_paths = [
         r"C:\Program Files\7-Zip\7z.exe",
@@ -54,7 +60,7 @@ def _compress(source_dir: str, archive_path: str):
                 timeout=60
             )
             if result.returncode == 0:
-                return
+                return archive_path
         except Exception:
             continue
 
@@ -67,6 +73,7 @@ def _compress(source_dir: str, archive_path: str):
                 full_path = os.path.join(root, f)
                 arcname = os.path.relpath(full_path, source_dir)
                 zf.write(full_path, arcname)
+    return archive_path_zip
 
 
 def _upload_to_github(archive_path: str, archive_name: str):
